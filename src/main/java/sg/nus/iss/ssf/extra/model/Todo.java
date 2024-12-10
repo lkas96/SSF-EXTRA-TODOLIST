@@ -1,12 +1,14 @@
 package sg.nus.iss.ssf.extra.model;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.UUID;
 
-import jakarta.validation.constraints.FutureOrPresent;
+import org.springframework.format.annotation.DateTimeFormat;
+
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import jakarta.validation.constraints.NotNull;
 
 public class Todo {
 
@@ -33,9 +35,9 @@ public class Todo {
     @Size(max = 255, message = "Maximum length is 255 characters.")
     private String desc;
 
-    @NotNull(message = "Due date must not be empty")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     // @FutureOrPresent(message = "Must be due later today or in the future.")
-    private Long due;
+    private Date due;
 
     @NotEmpty(message = "Priority must not be empty")
     @Pattern(regexp = "low|medium|high", message = "Value must be Low, Medium, or High")
@@ -45,11 +47,11 @@ public class Todo {
     @Pattern(regexp = "pending|started|in_progress|completed", message = "Value must be Low, Medium, or High")
     private String status;
 
-    @NotNull(message = "Created On must not be empty")
-    private Long createdOn;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private Date createdOn;
 
-    @NotNull(message = "Updated On must not be empty")
-    private Long updatedOn;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private Date updatedOn;
 
     public String getId() {
         return id;
@@ -75,11 +77,11 @@ public class Todo {
         this.desc = desc;
     }
 
-    public Long getDue() {
+    public Date getDue() {
         return due;
     }
 
-    public void setDue(Long due) {
+    public void setDue(Date due) {
         this.due = due;
     }
 
@@ -99,25 +101,25 @@ public class Todo {
         this.status = status;
     }
 
-    public Long getCreatedOn() {
+    public Date getCreatedOn() {
         return createdOn;
     }
 
-    public void setCreatedOn(Long createdOn) {
+    public void setCreatedOn(Date createdOn) {
         this.createdOn = createdOn;
     }
 
-    public Long getUpdatedOn() {
+    public Date getUpdatedOn() {
         return updatedOn;
     }
 
-    public void setUpdatedOn(Long updatedOn) {
+    public void setUpdatedOn(Date updatedOn) {
         this.updatedOn = updatedOn;
     }
 
-    //Meant for use when doing intial load from file
-    public Todo(String id, String name, String desc, Long due, String prior, String status, Long createdOn,
-            Long updatedOn) {
+    // Meant for use when doing intial load from file
+    public Todo(String id, String name, String desc, Date due, String prior, String status, Date createdOn,
+            Date updatedOn) {
         this.id = id;
         this.name = name;
         this.desc = desc;
@@ -126,6 +128,29 @@ public class Todo {
         this.status = status;
         this.createdOn = createdOn;
         this.updatedOn = updatedOn;
+    }
+
+    //For creating a new entry
+    //Add form
+    public Todo(String id, String name, String desc, Date due, String prior, String status) {
+        this.id = id;
+        this.name = name;
+        this.desc = desc;
+        this.due = due;
+        this.prior = prior;
+        this.status = status;
+
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        String formattedDueDateString = formatter.format(new Date());
+
+        try {
+            Date createdDate = formatter.parse(formattedDueDateString);
+            this.createdOn = createdDate;
+            this.updatedOn = createdOn;
+        } catch (java.text.ParseException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public Todo() {

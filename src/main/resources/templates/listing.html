@@ -55,14 +55,14 @@
               <td th:utext="${todo.id}"></td>
               <td th:utext="${todo.name}"></td>
               <td th:utext="${todo.desc}"></td>
-              <!-- <td th:utext="${todo.due}"></td> -->
-              <td th:utext="${#dates.format(todo.due, 'dd-MM-yyyy')}"></td>
+              <td th:utext="${todo.due}"></td>
+              <!-- <td th:utext="${#dates.format(todo.due, 'dd-MM-yyyy')}"></td> -->
               <td th:utext="${todo.prior}"></td>
               <td th:utext="${todo.status}"></td>
-              <!-- <td th:utext="${todo.createdOn}"></td>
-              <td th:utext="${todo.updatedOn}"></td> -->
-              <td th:utext="${#dates.format(todo.createdOn, 'dd-MM-yyyy')}"></td>
-              <td th:utext="${#dates.format(todo.updatedOn, 'dd-MM-yyyy')}"></td>
+              <td th:utext="${todo.createdOn}"></td>
+              <td th:utext="${todo.updatedOn}"></td>
+              <!-- <td th:utext="${#dates.format(todo.createdOn, 'dd-MM-yyyy')}"></td> -->
+              <!-- <td th:utext="${#dates.format(todo.updatedOn, 'dd-MM-yyyy')}"></td> -->
               <!-- <td th:utext="${#dates.format(person.dob, 'dd-MM-yyyy')}"></td> -->
               <td>
                 <a class="btn btn-success" th:href="@{/listing/update/{todo-id}(todo-id=${todo.id})}">Edit</a>

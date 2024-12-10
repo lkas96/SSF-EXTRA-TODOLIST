@@ -1,7 +1,12 @@
 package sg.nus.iss.ssf.extra.service;
 
 import java.io.StringReader;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -40,26 +45,29 @@ public class TodoService {
             JsonReader jr = Json.createReader(new StringReader(hashvalue));
             JsonObject jo = jr.readObject();
 
+            // Date conversion epoch to Date
+            JsonValue dueVal = jo.get("due");
+            JsonNumber dueNum = (JsonNumber) dueVal;
+            Date dueDate = new Date(dueNum.longValue());
+
+            JsonValue crVal = jo.get("createdOn");
+            JsonNumber crNum = (JsonNumber) crVal;
+            Date crDate = new Date(crNum.longValue());
+
+            JsonValue upVal = jo.get("updatedOn");
+            JsonNumber upNum = (JsonNumber) upVal;
+            Date upDate = new Date(upNum.longValue());
+
             // Instantiate a todo object from the jsonobject
             Todo td = new Todo();
             td.setId(jo.getString("id"));
             td.setName(jo.getString("name"));
             td.setDesc(jo.getString("desc"));
-
-            JsonValue temp = jo.get("due");
-            JsonNumber temp2 = (JsonNumber) temp;
-            td.setDue(temp2.longValue());
-
+            td.setDue(dueDate);
             td.setPrior(jo.getString("prior"));
             td.setStatus(jo.getString("status"));
-
-            JsonValue temp5 = jo.get("createdOn");
-            JsonNumber temp6 = (JsonNumber) temp5;
-            td.setCreatedOn(temp6.longValue());
-
-            JsonValue temp8 = jo.get("updatedOn");
-            JsonNumber temp9 = (JsonNumber) temp8;
-            td.setUpdatedOn(temp9.longValue());
+            td.setCreatedOn(crDate);
+            td.setUpdatedOn(upDate);
 
             // add to the arraylist
             todolist.add(td);
@@ -94,18 +102,21 @@ public class TodoService {
 
                 JsonValue temp = jo.get("due");
                 JsonNumber temp2 = (JsonNumber) temp;
-                td.setDue(temp2.longValue());
+                Date date = new Date(temp2.longValue());
+                td.setDue(date);
 
                 td.setPrior(jo.getString("prior"));
                 td.setStatus(jo.getString("status"));
-                
+
                 JsonValue temp5 = jo.get("createdOn");
                 JsonNumber temp6 = (JsonNumber) temp5;
-                td.setCreatedOn(temp6.longValue());
+                Date dateCr = new Date(temp6.longValue());
+                td.setCreatedOn(dateCr);
 
                 JsonValue temp8 = jo.get("updatedOn");
                 JsonNumber temp9 = (JsonNumber) temp8;
-                td.setUpdatedOn(temp9.longValue());
+                Date dateUp = new Date(temp9.longValue());
+                td.setUpdatedOn(dateUp);
 
                 // add to the arraylist
                 filteredlist.add(td);
@@ -118,15 +129,39 @@ public class TodoService {
 
     public void createEntry(Todo td) {
 
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+        Date temp = td.getDue();
+        String dueString = sdf.format(temp);
+        long dueEpoch = LocalDate.parse(dueString, formatter)
+                .atStartOfDay(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli();
+
+        Date temp2 = td.getCreatedOn();
+        String createdString = sdf.format(temp2);
+        long createdEpoch = LocalDate.parse(createdString, formatter)
+                .atStartOfDay(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli();
+
+        Date temp3 = td.getUpdatedOn();
+        String updatedString = sdf.format(temp3);
+        long updatedEpoch = LocalDate.parse(updatedString, formatter)
+                .atStartOfDay(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli();
+
         JsonObject toJson = Json.createObjectBuilder()
                 .add("id", td.getId())
                 .add("name", td.getName())
                 .add("desc", td.getDesc())
-                .add("due", td.getDue())
+                .add("due", dueEpoch)
                 .add("prior", td.getPrior())
                 .add("status", td.getStatus())
-                .add("createdOn", td.getCreatedOn())
-                .add("updatedOn", td.getUpdatedOn())
+                .add("createdOn", createdEpoch)
+                .add("updatedOn", updatedEpoch)
                 .build();
 
         mp.create(Constant.todoKey, td.getId().toString(), toJson.asJsonObject().toString());
@@ -134,21 +169,32 @@ public class TodoService {
 
     public Todo findById(String todoId) {
         Object findId = mp.get(Constant.todoKey, todoId);
-        //Convert object to String
+        // Convert object to String
         String convert = findId.toString();
 
         JsonReader jr = Json.createReader(new StringReader(convert));
         JsonObject jo = jr.readObject();
 
-        Todo td = new Todo( jo.getString("id"), 
-                            jo.getString("name"), 
-                            jo.getString("desc"), 
-                            jo.getJsonNumber("due").longValue(), 
-                            jo.getString("prior"), 
-                            jo.getString("status"), 
-                            jo.getJsonNumber("createdOn").longValue(),
-                            jo.getJsonNumber("updatedOn").longValue()
-        );
+        JsonValue dueVal = jo.get("due");
+        JsonNumber dueNum = (JsonNumber) dueVal;
+        Date dueDate = new Date(dueNum.longValue());
+
+        JsonValue crVal = jo.get("createdOn");
+        JsonNumber crNum = (JsonNumber) crVal;
+        Date crDate = new Date(crNum.longValue());
+
+        JsonValue upVal = jo.get("updatedOn");
+        JsonNumber upNum = (JsonNumber) upVal;
+        Date upDate = new Date(upNum.longValue());
+
+        Todo td = new Todo(jo.getString("id"),
+                jo.getString("name"),
+                jo.getString("desc"),
+                dueDate,
+                jo.getString("prior"),
+                jo.getString("status"),
+                crDate,
+                upDate);
 
         return td;
     }
@@ -159,17 +205,41 @@ public class TodoService {
 
     public void updateTodo(Todo found) {
 
-        //Create json object for storing
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        
+        Date temp = found.getDue();
+        String dueString = sdf.format(temp);
+        long dueEpoch = LocalDate.parse(dueString, formatter)
+                .atStartOfDay(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli();
+        
+        Date temp2 = found.getCreatedOn();
+        String createdString = sdf.format(temp2);
+        long createdEpoch = LocalDate.parse(createdString, formatter)
+                .atStartOfDay(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli();
+        
+        Date temp3 = found.getUpdatedOn();
+        String updatedString = sdf.format(temp3);
+        long updatedEpoch = LocalDate.parse(updatedString, formatter)
+                .atStartOfDay(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli();
+
+        // Create json object for storing
         JsonObject toJson = Json.createObjectBuilder()
-        .add("id", found.getId())
-        .add("name", found.getName())
-        .add("desc", found.getDesc())
-        .add("due", found.getDue())
-        .add("prior", found.getPrior())
-        .add("status", found.getStatus())
-        .add("createdOn", found.getCreatedOn())
-        .add("updatedOn", found.getUpdatedOn())
-        .build();
+                .add("id", found.getId())
+                .add("name", found.getName())
+                .add("desc", found.getDesc())
+                .add("due", dueEpoch)
+                .add("prior", found.getPrior())
+                .add("status", found.getStatus())
+                .add("createdOn", createdEpoch)
+                .add("updatedOn", updatedEpoch)
+                .build();
 
         mp.update(Constant.todoKey, found.getId(), toJson.toString());
 

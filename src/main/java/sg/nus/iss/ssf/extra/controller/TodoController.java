@@ -1,14 +1,12 @@
 package sg.nus.iss.ssf.extra.controller;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.MultiValueMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,7 +17,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
 @Controller
 @RequestMapping("/listing")
@@ -58,44 +55,52 @@ public class TodoController {
         return "add";
     }
 
+    // @PostMapping("/add")
+    // public String postCreateForm(@Valid @RequestBody MultiValueMap<String,
+    // String> formData, BindingResult result,
+    // Model model) throws ParseException {
+
+    // // THIS METHOD HAS NO FORM VALIDATION
+    // // SOMEHOW IT DOES NOT CHECK EVEN WITH THE @VALID TAG
+    // // I dont know how to make it work
+
+    // String id = formData.getFirst("id");
+    // String name = formData.getFirst("name");
+    // String desc = formData.getFirst("desc");
+    // String due = formData.getFirst("due");
+    // String prior = formData.getFirst("prior");
+    // String status = formData.getFirst("status");
+
+    // // Set current time and date and add to object
+    // SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+    // String formattedDueDateString = formatter.format(due);
+    // Date dueDate = formatter.parse(formattedDueDateString);
+
+    // Date nowLiveDate = new Date();
+    // String formattedDateString = formatter.format(nowLiveDate);
+    // Date createdDate = formatter.parse(formattedDateString);
+
+    // // First entry, created date same as updated Date
+    // Date updatedDate = createdDate;
+
+    // Todo td = new Todo(id, name, desc, dueDate, prior, status, createdDate,
+    // updatedDate);
+
+    // tds.createEntry(td);
+
+    // return "redirect:/listing";
+    // }
+
     @PostMapping("/add")
-    public String postCreateForm(@Valid @RequestBody MultiValueMap<String, String> formData, BindingResult result, Model model) {
+    public String postCreateForm(@Valid @ModelAttribute("todo") Todo todo, BindingResult result, Model model)
+            throws ParseException {
+        if (result.hasErrors()) {
+            System.out.println(result.getAllErrors());
+            return "add"; // Return to the form view if there are validation errors
+        }
 
-        //THIS METHOD HAS NO FORM VALIDATION
-        //SOMEHOW IT DOES NOT CHECK EVEN WITH THE @VALID TAG
-        //I dont know how to make it work
-        
-        String id = formData.getFirst("id");
-        String name = formData.getFirst("name");
-        String desc = formData.getFirst("desc");
-        String due = formData.getFirst("due");
-        String prior = formData.getFirst("prior");
-        String status = formData.getFirst("status");
-
-        System.out.println(id);
-        System.out.println(name);
-        System.out.println(desc);
-        System.out.println(due);
-        System.out.println(prior);
-        System.out.println(status);
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        @SuppressWarnings("null")
-        long dueEpoch = LocalDate.parse(due.toString(), formatter)
-                .atStartOfDay(ZoneId.systemDefault())
-                .toInstant()
-                .toEpochMilli();
-        
-        System.out.println(dueEpoch);
-
-        // Set current time and date and add to object
-        long createdOnEpoch = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        long updatedOnEpoch = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-
-        System.out.println(createdOnEpoch);
-        System.out.println(updatedOnEpoch);
-
-        Todo td = new Todo(id, name, desc, dueEpoch, prior, status, createdOnEpoch, updatedOnEpoch);
+        Todo td = new Todo(todo.getId(), todo.getName(), todo.getDesc(), todo.getDue(), todo.getPrior(),
+                todo.getStatus());
 
         tds.createEntry(td);
 
@@ -111,26 +116,24 @@ public class TodoController {
     }
 
     @PostMapping("/update")
-    public String postUpdateForm(@Valid @ModelAttribute("todo") Todo todo, BindingResult result, Model model) {
-        //fheck if error, else throw back form
-        //find the id, set each id
-        Todo updated = tds.findById(todo.getId());
-        
-        //Set the new update values
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        long dueEpoch = LocalDate.parse(todo.getDue().toString(), formatter)
-                .atStartOfDay(ZoneId.systemDefault())
-                .toInstant()
-                .toEpochMilli();
-        
-        updated.setDue(dueEpoch);
-        // found.setCreatedOn(found.getCreatedOn()); //No change to this so no update
-        long updatedOnEpoch = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        updated.setUpdatedOn(updatedOnEpoch);
+    public String postUpdateForm(@Valid @ModelAttribute("todo") Todo todo, BindingResult result, Model model) throws ParseException {
 
-        //Update the new values into redis
-        tds.updateTodo(updated);
-        
+        if (result.hasErrors()) {
+            System.out.println(result.getAllErrors());
+            return "update"; // Return to the form view if there are validation errors
+        }
+
+        // Set new updated time to now
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        String formattedDueDateString = formatter.format(new Date());
+
+        Date updatedDate = formatter.parse(formattedDueDateString);
+
+        todo.setUpdatedOn(updatedDate);
+
+        // Update the new values into redis
+        tds.updateTodo(todo);
+
         return "redirect:/listing";
     }
 
@@ -140,9 +143,5 @@ public class TodoController {
 
         return "redirect:/listing";
     }
-    
-    
-    
-    
-    
+
 }
