@@ -14,23 +14,23 @@
     <br>
     <div class="container">
 
-      <h1>Creating a new todo entry</h1>
+      <h1>Updating an Entry</h1>
         <br>
 
-        <form method="POST" th:action="@{/listing/add}" th:object="${todo}">
+        <form method="POST" th:action="@{/listing/update}" th:object="${todo}">
 
           <input type="hidden" th:field="${todo.id}" />
 
           <div class="mb-3">
             <label for="exampleFormControlInput1">Name: </label>
-            <input type="text" class="form-control" th:field="*{name}" placeholder="Full name">
+            <input type="text" class="form-control" name="name" th:field="*{name}" placeholder="Full name">
             <div class="text-danger" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
         </div>
 
             <br>
             <div class="mb-3">
                 <label for="exampleFormControlInput1" class="form-label">Description: </label>
-                <input type="text" class="form-control" th:field="*{desc}" placeholder="Describe Todo Task"></div>
+                <input type="text" class="form-control" name="desc" th:field="*{desc}" placeholder="Describe Todo Task"></div>
             <div class="text-danger" th:if="${#fields.hasErrors('desc')}" th:errors="*{desc}">
             </div><br>
 
@@ -38,7 +38,7 @@
 
             <div class="mb-3">
                 <label for="exampleFormControlInput1">Due Date:</label>
-                <input type="date" class="form-control" th:field="*{due}">
+                <input type="date" class="form-control" name="due" th:field="*{due}">
                 <div class="text-danger" th:if="${#fields.hasErrors('due')}" th:errors="*{due}"></div>
             </div>
             <br>
@@ -71,7 +71,7 @@
           <input type="hidden" th:field="${todo.createdOn}" />
           <input type="hidden" th:field="${todo.updatedOn}" />
 
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="submit" class="btn btn-primary">Update</button>
           </form>
     </div>
 

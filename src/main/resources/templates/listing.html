@@ -16,6 +16,9 @@
     <div class="container">
       <br />
       <h1>List of Todos</h1>
+      <br><br>
+        <a class="btn btn-primary" th:href="@{/listing/add}">Create</a>
+        <br/><br/>
       <br />
       <form method="get" data-th-action="@{/listing/filter}">
         <!-- <label for="filter">Filter By Status</label> -->
@@ -43,6 +46,7 @@
             <th>Status</th>
             <th>Create On</th>
             <th>Updated On</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -60,6 +64,10 @@
               <td th:utext="${#dates.format(todo.createdOn, 'dd-MM-yyyy')}"></td>
               <td th:utext="${#dates.format(todo.updatedOn, 'dd-MM-yyyy')}"></td>
               <!-- <td th:utext="${#dates.format(person.dob, 'dd-MM-yyyy')}"></td> -->
+              <td>
+                <a class="btn btn-success" th:href="@{/listing/update/{todo-id}(todo-id=${todo.id})}">Edit</a>
+                <a class="btn btn-danger" th:href="@{/listing/delete/{todo-id}(todo-id=${todo.id})}">Delete</a>
+              </td>
             </div>
           <div th:if="${rows.size le 0}">No records found.</div>
         </tr>

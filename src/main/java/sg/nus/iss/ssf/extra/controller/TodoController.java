@@ -17,6 +17,7 @@ import sg.nus.iss.ssf.extra.model.Todo;
 import sg.nus.iss.ssf.extra.service.TodoService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -62,6 +63,7 @@ public class TodoController {
 
         //THIS METHOD HAS NO FORM VALIDATION
         //SOMEHOW IT DOES NOT CHECK EVEN WITH THE @VALID TAG
+        //I dont know how to make it work
         
         String id = formData.getFirst("id");
         String name = formData.getFirst("name");
@@ -84,7 +86,7 @@ public class TodoController {
                 .toInstant()
                 .toEpochMilli();
         
-                System.out.println(dueEpoch);
+        System.out.println(dueEpoch);
 
         // Set current time and date and add to object
         long createdOnEpoch = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
@@ -100,35 +102,47 @@ public class TodoController {
         return "redirect:/listing";
     }
 
-    // public String postCreateForm(@Valid @ModelAttribute("todo") Todo todo, BindingResult result, Model model) {
-    //     System.out.println(todo.toString());
+    @GetMapping("/update/{todo-id}")
+    public String getMethodName(@PathVariable("todo-id") String todoId, Model model) {
+        Todo found = tds.findById(todoId);
+        model.addAttribute("todo", found);
+
+        return "update";
+    }
+
+    @PostMapping("/update")
+    public String postUpdateForm(@Valid @ModelAttribute("todo") Todo todo, BindingResult result, Model model) {
+        //fheck if error, else throw back form
+        //find the id, set each id
+        Todo updated = tds.findById(todo.getId());
         
-    //     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    //     long dueEpoch = LocalDate.parse(todo.getDue().toString(), formatter)
-    //             .atStartOfDay(ZoneId.systemDefault())
-    //             .toInstant()
-    //             .toEpochMilli();
+        //Set the new update values
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        long dueEpoch = LocalDate.parse(todo.getDue().toString(), formatter)
+                .atStartOfDay(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli();
         
-    //     System.out.println(dueEpoch + ":testing");
+        updated.setDue(dueEpoch);
+        // found.setCreatedOn(found.getCreatedOn()); //No change to this so no update
+        long updatedOnEpoch = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        updated.setUpdatedOn(updatedOnEpoch);
 
-    //     // Oerwrite the new formatted date as long
-    //     todo.setDue(dueEpoch);
+        //Update the new values into redis
+        tds.updateTodo(updated);
+        
+        return "redirect:/listing";
+    }
 
-    //     // Set current time and date and add to object
-    //     long createdOnEpoch = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-    //     long updatedOnEpoch = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-    //     todo.setCreatedOn(createdOnEpoch);
-    //     todo.setUpdatedOn(updatedOnEpoch);
+    @GetMapping("/delete/{todo-id}")
+    public String deleteTodo(@PathVariable("todo-id") String todoId) {
+        tds.deleteTodo(todoId);
 
-    //     if (result.hasErrors()) {
-    //         System.out.println(result);
-    //         return "add";
-    //     }
-
-    //     // Create an entry in redis/save to redis
-    //     tds.createEntry(todo);
-
-    //     return "redirect:/listing";
-    // }
-
+        return "redirect:/listing";
+    }
+    
+    
+    
+    
+    
 }

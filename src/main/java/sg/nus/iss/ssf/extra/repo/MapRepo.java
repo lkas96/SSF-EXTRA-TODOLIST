@@ -63,4 +63,8 @@ public class MapRepo {
         Duration expireDuration = Duration.ofSeconds(expireValue);
         redisTemplate.expire(redisKey, expireDuration);
     }
+
+    public void update(String redisKey, String hashKey, String newHashValue) {
+        redisTemplate.opsForHash().put(redisKey, hashKey, newHashValue);
+    }
 }

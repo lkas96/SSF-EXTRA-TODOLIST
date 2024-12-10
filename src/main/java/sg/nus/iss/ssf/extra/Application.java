@@ -56,7 +56,7 @@ public class Application implements CommandLineRunner {
 
 		// Testing file has be read properly
 		// and is saved to a variable for processing
-		System.out.println(jsonData);
+		// System.out.println(jsonData);
 
 		// Now deserialize this chunk of json data and save into redis as String
 		JsonReader jr = Json.createReader(new StringReader(jsonData));

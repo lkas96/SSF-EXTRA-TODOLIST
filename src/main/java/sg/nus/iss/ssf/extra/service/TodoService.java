@@ -131,4 +131,47 @@ public class TodoService {
 
         mp.create(Constant.todoKey, td.getId().toString(), toJson.asJsonObject().toString());
     }
+
+    public Todo findById(String todoId) {
+        Object findId = mp.get(Constant.todoKey, todoId);
+        //Convert object to String
+        String convert = findId.toString();
+
+        JsonReader jr = Json.createReader(new StringReader(convert));
+        JsonObject jo = jr.readObject();
+
+        Todo td = new Todo( jo.getString("id"), 
+                            jo.getString("name"), 
+                            jo.getString("desc"), 
+                            jo.getJsonNumber("due").longValue(), 
+                            jo.getString("prior"), 
+                            jo.getString("status"), 
+                            jo.getJsonNumber("createdOn").longValue(),
+                            jo.getJsonNumber("updatedOn").longValue()
+        );
+
+        return td;
+    }
+
+    public void deleteTodo(String todoId) {
+        mp.delete(Constant.todoKey, todoId);
+    }
+
+    public void updateTodo(Todo found) {
+
+        //Create json object for storing
+        JsonObject toJson = Json.createObjectBuilder()
+        .add("id", found.getId())
+        .add("name", found.getName())
+        .add("desc", found.getDesc())
+        .add("due", found.getDue())
+        .add("prior", found.getPrior())
+        .add("status", found.getStatus())
+        .add("createdOn", found.getCreatedOn())
+        .add("updatedOn", found.getUpdatedOn())
+        .build();
+
+        mp.update(Constant.todoKey, found.getId(), toJson.toString());
+
+    }
 }
