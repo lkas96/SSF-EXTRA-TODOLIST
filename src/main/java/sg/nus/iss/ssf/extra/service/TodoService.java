@@ -1,6 +1,7 @@
 package sg.nus.iss.ssf.extra.service;
 
 import java.io.StringReader;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -127,8 +128,12 @@ public class TodoService {
 
     }
 
-    public void createEntry(Todo td) {
+    public void createEntry(Todo todo) {
 
+        Todo td = new Todo(todo.getId(), todo.getName(), todo.getDesc(), todo.getDue(), todo.getPrior(),
+                todo.getStatus());
+
+        //Process date for storing as JsonObject into the redis map
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -164,6 +169,7 @@ public class TodoService {
                 .add("updatedOn", updatedEpoch)
                 .build();
 
+        //Storing in the redis map
         mp.create(Constant.todoKey, td.getId().toString(), toJson.asJsonObject().toString());
     }
 
@@ -205,23 +211,35 @@ public class TodoService {
 
     public void updateTodo(Todo found) {
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        // Set new updated time to now
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        
+        String formattedDueDateString = sdf.format(new Date());
+        Date updatedDate;
+
+        try {
+            updatedDate = sdf.parse(formattedDueDateString);
+            found.setUpdatedOn(updatedDate);
+        } catch (ParseException e) {
+            //Do nothing at the momemt, no error handling
+            e.printStackTrace();
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
         Date temp = found.getDue();
         String dueString = sdf.format(temp);
         long dueEpoch = LocalDate.parse(dueString, formatter)
                 .atStartOfDay(ZoneId.systemDefault())
                 .toInstant()
                 .toEpochMilli();
-        
+
         Date temp2 = found.getCreatedOn();
         String createdString = sdf.format(temp2);
         long createdEpoch = LocalDate.parse(createdString, formatter)
                 .atStartOfDay(ZoneId.systemDefault())
                 .toInstant()
                 .toEpochMilli();
-        
+
         Date temp3 = found.getUpdatedOn();
         String updatedString = sdf.format(temp3);
         long updatedEpoch = LocalDate.parse(updatedString, formatter)

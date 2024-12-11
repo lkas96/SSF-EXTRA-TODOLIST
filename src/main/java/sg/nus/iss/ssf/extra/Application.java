@@ -41,7 +41,7 @@ public class Application implements CommandLineRunner {
 
 		try {
 			StringBuilder sb = new StringBuilder();
-			String line = br.readLine();
+			String line = br.readLine(); //discarde header line
 
 			while (line != null) {
 				sb.append(line);
@@ -106,7 +106,7 @@ public class Application implements CommandLineRunner {
 					.add("updatedOn", updatedOnEpoch)
 					.build();
 
-					System.out.println(toBuild);
+					// System.out.println(toBuild);
 
 			// SAVE EACH ENTRY INTO REDIS MAP FOLLOWING FORMAT
 			// REDIS KEY, HASHKEY, HASHVALUE

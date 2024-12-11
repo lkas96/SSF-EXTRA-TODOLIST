@@ -1,8 +1,6 @@
 package sg.nus.iss.ssf.extra.controller;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -55,6 +53,7 @@ public class TodoController {
         return "add";
     }
 
+    //USING MULTI VALUE MAP FROM FORM DATA PASSED TO CONTROLLER
     // @PostMapping("/add")
     // public String postCreateForm(@Valid @RequestBody MultiValueMap<String,
     // String> formData, BindingResult result,
@@ -91,18 +90,17 @@ public class TodoController {
     // return "redirect:/listing";
     // }
 
+
+    //USING OBJECT MODEL ATTRIBUTE TO PASS TO THE CONTROLLER
     @PostMapping("/add")
-    public String postCreateForm(@Valid @ModelAttribute("todo") Todo todo, BindingResult result, Model model)
-            throws ParseException {
+    public String postCreateForm(@Valid @ModelAttribute("todo") Todo todo, BindingResult result, Model model){
         if (result.hasErrors()) {
             System.out.println(result.getAllErrors());
             return "add"; // Return to the form view if there are validation errors
         }
 
-        Todo td = new Todo(todo.getId(), todo.getName(), todo.getDesc(), todo.getDue(), todo.getPrior(),
-                todo.getStatus());
-
-        tds.createEntry(td);
+        //Pass the todo object into the create method
+        tds.createEntry(todo);
 
         return "redirect:/listing";
     }
@@ -123,15 +121,8 @@ public class TodoController {
             return "update"; // Return to the form view if there are validation errors
         }
 
-        // Set new updated time to now
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        String formattedDueDateString = formatter.format(new Date());
-
-        Date updatedDate = formatter.parse(formattedDueDateString);
-
-        todo.setUpdatedOn(updatedDate);
-
-        // Update the new values into redis
+        //Pass the todo object into the Service layer for processing
+        //Update the new date into redis
         tds.updateTodo(todo);
 
         return "redirect:/listing";
