@@ -31,8 +31,13 @@ public class ListRepo {
     }
 
     // slide 32
+    // public String get(String key, Integer index) {
+    //     return template.opsForList().index(key, index).toString();
+    // }
+
     public String get(String key, Integer index) {
-        return template.opsForList().index(key, index).toString();
+        Object value = template.opsForList().index(key, index);
+        return value != null ? value.toString() : null;
     }
 
     // slide 33

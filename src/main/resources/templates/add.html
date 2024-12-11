@@ -41,8 +41,8 @@
 
             <div class="mb-3">
                 <label for="prior" class="form-label">Priority:</label>
-                <select id="prior" name="prior" class="form-select" required>
-                  <option value="" disabled selected></option>
+                <select id="prior" class="form-select" th:field="*{prior}">
+                  <option value="" disabled selected>Select Priority</option>
                   <option value="low">Low</option>
                   <option value="medium">Medium</option>
                   <option value="high">High</option>
@@ -52,8 +52,8 @@
 
             <div class="mb-3">
               <label for="status" class="form-label">Status:</label>
-              <select id="status" name="status" class="form-select" required>
-                <option value="" disabled selected></option>
+              <select id="status" class="form-select" th:field="*{status}">
+                <option value="" disabled selected>Select Status</option>
                 <option value="started">Started</option>
                 <option value="pending">Pending</option>
                 <option value="in_progress">In Progress</option>

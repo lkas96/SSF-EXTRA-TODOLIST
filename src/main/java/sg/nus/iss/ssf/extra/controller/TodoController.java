@@ -1,6 +1,5 @@
 package sg.nus.iss.ssf.extra.controller;
 
-import java.text.ParseException;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -24,7 +23,9 @@ public class TodoController {
 
     @GetMapping(path = { "", "all" })
     public String dispalyAllTodos(Model model) {
+
         List<Todo> todolist = tds.getEntries();
+        
         model.addAttribute("todolist", todolist);
 
         return "listing";
@@ -35,7 +36,9 @@ public class TodoController {
     // http://localhost:5123/listing/filter?filter=whateverOption
     @GetMapping("/filter")
     public String filterBy(@RequestParam String filter, Model model) {
+
         List<Todo> filteredlist = tds.getFiltered(filter);
+
         model.addAttribute("todolist", filteredlist);
         return "listing";
     }
@@ -94,6 +97,7 @@ public class TodoController {
     //USING OBJECT MODEL ATTRIBUTE TO PASS TO THE CONTROLLER
     @PostMapping("/add")
     public String postCreateForm(@Valid @ModelAttribute("todo") Todo todo, BindingResult result, Model model){
+
         if (result.hasErrors()) {
             System.out.println(result.getAllErrors());
             return "add"; // Return to the form view if there are validation errors
@@ -107,14 +111,16 @@ public class TodoController {
 
     @GetMapping("/update/{todo-id}")
     public String getMethodName(@PathVariable("todo-id") String todoId, Model model) {
+
         Todo found = tds.findById(todoId);
+
         model.addAttribute("todo", found);
 
         return "update";
     }
 
     @PostMapping("/update")
-    public String postUpdateForm(@Valid @ModelAttribute("todo") Todo todo, BindingResult result, Model model) throws ParseException {
+    public String postUpdateForm(@Valid @ModelAttribute("todo") Todo todo, BindingResult result, Model model){
 
         if (result.hasErrors()) {
             System.out.println(result.getAllErrors());
@@ -130,6 +136,7 @@ public class TodoController {
 
     @GetMapping("/delete/{todo-id}")
     public String deleteTodo(@PathVariable("todo-id") String todoId) {
+
         tds.deleteTodo(todoId);
 
         return "redirect:/listing";

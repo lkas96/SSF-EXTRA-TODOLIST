@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -36,14 +37,12 @@ public class Todo {
     private String desc;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    // @FutureOrPresent(message = "Must be due later today or in the future.")
+    @FutureOrPresent(message = "Must be due later today or in the future.")
     private Date due;
 
-    @NotEmpty(message = "Priority must not be empty")
     @Pattern(regexp = "low|medium|high", message = "Value must be Low, Medium, or High")
     private String prior;
 
-    @NotEmpty(message = "Status must not be empty")
     @Pattern(regexp = "pending|started|in_progress|completed", message = "Value must be Low, Medium, or High")
     private String status;
 
@@ -132,6 +131,7 @@ public class Todo {
 
     //For creating a new entry
     //Add form
+    //Consutrcot without the createddate/upadted date
     public Todo(String id, String name, String desc, Date due, String prior, String status) {
         this.id = id;
         this.name = name;
